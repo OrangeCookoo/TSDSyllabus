@@ -3,6 +3,7 @@ package uk.co.btsda.syllabus.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +57,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -64,6 +67,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+import uk.co.btsda.syllabus.R
 import uk.co.btsda.syllabus.data.Belt
 import uk.co.btsda.syllabus.data.Category
 import uk.co.btsda.syllabus.data.SyllabusData
@@ -128,8 +132,8 @@ fun SyllabusApp(vm: SyllabusViewModel = viewModel()) {
 
 @Composable
 private fun AppHeader() {
-    Box(
-        Modifier
+    Row(
+        modifier = Modifier
             .fillMaxWidth()
             .background(
                 Brush.horizontalGradient(
@@ -140,8 +144,25 @@ private fun AppHeader() {
                     )
                 )
             )
-            .padding(start = 20.dp, end = 20.dp, top = 44.dp, bottom = 16.dp)
+            .padding(start = 16.dp, end = 20.dp, top = 40.dp, bottom = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        Box(
+            Modifier
+                .size(60.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .padding(3.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.btsda_logo),
+                contentDescription = "Bristol Tang Soo Do Academy logo",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize().clip(CircleShape),
+            )
+        }
+        Spacer(Modifier.width(14.dp))
         Column {
             Text(
                 "Tang Soo Do",
