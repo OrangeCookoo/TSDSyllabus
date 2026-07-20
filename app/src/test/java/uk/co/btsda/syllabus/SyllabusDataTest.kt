@@ -110,10 +110,10 @@ class SyllabusDataTest {
         assertTrue(tech(Category.HANDS, 1).videoUrl.startsWith(block15))
         assertTrue(tech(Category.FEET, 4).videoUrl.startsWith(block15))
         assertTrue(tech(Category.SELF_DEFENSE, 5).videoUrl.startsWith(block15))
-        // A later block resolves to its own video.
+        // A later block resolves to its own video (Hands #16 opens the 16-20 clip).
         assertEquals(
             "https://www.youtube.com/watch?v=wotAiTXp9KU",
-            tech(Category.FEET, 18).videoUrl // block 16-20, no timestamp
+            tech(Category.HANDS, 16).videoUrl
         )
     }
 
@@ -135,6 +135,15 @@ class SyllabusDataTest {
         assertEquals("https://www.youtube.com/watch?v=oB6q-AxH0cs&t=10s", tech(Category.HANDS, 7).videoUrl)
         assertEquals("https://www.youtube.com/watch?v=oB6q-AxH0cs&t=60s", tech(Category.FEET, 9).videoUrl)
         assertEquals("https://www.youtube.com/watch?v=oB6q-AxH0cs&t=107s", tech(Category.SELF_DEFENSE, 10).videoUrl)
+    }
+
+    @Test
+    fun timestampsForTheSixteenToTwentyBlock() {
+        fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU", tech(Category.HANDS, 16).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=32s", tech(Category.HANDS, 20).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=41s", tech(Category.FEET, 16).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=107s", tech(Category.SELF_DEFENSE, 20).videoUrl)
     }
 
     @Test
