@@ -119,8 +119,22 @@ object VideoLinks {
      * Example: technique starting at 1:23 -> "BO_STAFF_17" to 83.
      */
     val startSeconds: Map<String, Int> = mapOf(
-        // "BO_STAFF_16" to 5,
-        // "BO_STAFF_17" to 41,
+        // "1 Step Sparring" block 1-5 video (one clip: hands, then feet, then
+        // self defense). Hands #1 is at the start, so it has no offset.
+        "HANDS_2" to 9,
+        "HANDS_3" to 13,
+        "HANDS_4" to 19,
+        "HANDS_5" to 26,
+        "FEET_1" to 30,
+        "FEET_2" to 37,
+        "FEET_3" to 42,
+        "FEET_4" to 48,
+        "FEET_5" to 55,
+        "SELF_DEFENSE_1" to 60,
+        "SELF_DEFENSE_2" to 67,
+        "SELF_DEFENSE_3" to 71,
+        "SELF_DEFENSE_4" to 75,
+        "SELF_DEFENSE_5" to 80,
     )
 
     /** Builds a watch URL, adding a start time (&t=NNs) when one is provided. */

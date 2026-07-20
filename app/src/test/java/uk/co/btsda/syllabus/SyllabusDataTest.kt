@@ -104,16 +104,27 @@ class SyllabusDataTest {
     @Test
     fun emptyHandCategoriesShareTheOneStepSparringVideos() {
         fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
-        // Block 1-5 video is the same across hands, feet and self defense.
-        val expected = "https://www.youtube.com/watch?v=I4dj-SSDh3Q"
-        assertEquals(expected, tech(Category.HANDS, 1).videoUrl)
-        assertEquals(expected, tech(Category.FEET, 4).videoUrl)
-        assertEquals(expected, tech(Category.SELF_DEFENSE, 5).videoUrl)
+        // Block 1-5 video is the same across hands, feet and self defense
+        // (the timestamp differs per technique within that one clip).
+        val block15 = "https://www.youtube.com/watch?v=I4dj-SSDh3Q"
+        assertTrue(tech(Category.HANDS, 1).videoUrl.startsWith(block15))
+        assertTrue(tech(Category.FEET, 4).videoUrl.startsWith(block15))
+        assertTrue(tech(Category.SELF_DEFENSE, 5).videoUrl.startsWith(block15))
         // A later block resolves to its own video.
         assertEquals(
             "https://www.youtube.com/watch?v=wotAiTXp9KU",
-            tech(Category.FEET, 18).videoUrl // block 16-20
+            tech(Category.FEET, 18).videoUrl // block 16-20, no timestamp
         )
+    }
+
+    @Test
+    fun timestampsJumpIntoTheSharedBlockVideo() {
+        fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
+        // Hands #1 has no offset -> opens at the start.
+        assertEquals("https://www.youtube.com/watch?v=I4dj-SSDh3Q", tech(Category.HANDS, 1).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=I4dj-SSDh3Q&t=9s", tech(Category.HANDS, 2).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=I4dj-SSDh3Q&t=30s", tech(Category.FEET, 1).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=I4dj-SSDh3Q&t=80s", tech(Category.SELF_DEFENSE, 5).videoUrl)
     }
 
     @Test
