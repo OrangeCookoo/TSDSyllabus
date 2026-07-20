@@ -7,6 +7,7 @@ import org.junit.Test
 import uk.co.btsda.syllabus.data.Belt
 import uk.co.btsda.syllabus.data.Category
 import uk.co.btsda.syllabus.data.SyllabusData
+import uk.co.btsda.syllabus.data.VideoLinks
 
 class SyllabusDataTest {
 
@@ -75,11 +76,44 @@ class SyllabusDataTest {
     }
 
     @Test
-    fun videoUrlPointsAtBtsdaChannelSearch() {
-        val t = SyllabusData.techniques.first()
-        assertTrue(t.videoUrl.startsWith("https://www.youtube.com/@bristoltangsoodoacademy/search?query="))
-        // "1 Step Sparring" -> the space becomes + and parentheses are encoded
-        assertTrue(t.videoUrl.contains("Sparring"))
+    fun everyTechniqueHasADirectVideoLink() {
+        val notDirect = SyllabusData.techniques.filterNot { it.hasDirectVideo }
+        assertTrue("All techniques should link directly: $notDirect", notDirect.isEmpty())
+        assertTrue(SyllabusData.techniques.all {
+            it.videoUrl.startsWith("https://www.youtube.com/watch?v=")
+        })
+    }
+
+    @Test
+    fun watchUrlAppendsTimestampWhenProvided() {
+        assertEquals("https://www.youtube.com/watch?v=abc", VideoLinks.watchUrl("abc", null))
+        assertEquals("https://www.youtube.com/watch?v=abc&t=83s", VideoLinks.watchUrl("abc", 83))
+    }
+
+    @Test
+    fun boStaffBlocksLinkToTheCorrectVideo() {
+        fun bo(n: Int) = SyllabusData.byCategory(Category.BO_STAFF).first { it.number == n }
+        assertEquals("https://www.youtube.com/watch?v=nZnX0kgs_Sw", bo(3).videoUrl)   // 1-5
+        assertEquals("https://www.youtube.com/watch?v=qRzaGcJJ2E0", bo(8).videoUrl)   // 6-10
+        assertEquals("https://www.youtube.com/watch?v=gjniNGbuPh4", bo(13).videoUrl)  // 11-15
+        assertEquals("https://www.youtube.com/watch?v=-hYMwVNhH8o", bo(18).videoUrl)  // 16-20
+        assertEquals("https://www.youtube.com/watch?v=dom7Iq__hqE", bo(23).videoUrl)  // 21-25
+        assertEquals("https://www.youtube.com/watch?v=JLr2zCxpXME", bo(28).videoUrl)  // 26-30
+    }
+
+    @Test
+    fun emptyHandCategoriesShareTheOneStepSparringVideos() {
+        fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
+        // Block 1-5 video is the same across hands, feet and self defense.
+        val expected = "https://www.youtube.com/watch?v=I4dj-SSDh3Q"
+        assertEquals(expected, tech(Category.HANDS, 1).videoUrl)
+        assertEquals(expected, tech(Category.FEET, 4).videoUrl)
+        assertEquals(expected, tech(Category.SELF_DEFENSE, 5).videoUrl)
+        // A later block resolves to its own video.
+        assertEquals(
+            "https://www.youtube.com/watch?v=wotAiTXp9KU",
+            tech(Category.FEET, 18).videoUrl // block 16-20
+        )
     }
 
     @Test

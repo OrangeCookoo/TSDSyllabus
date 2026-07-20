@@ -58,14 +58,74 @@ data class Technique(
         }
 
     /**
-     * A YouTube deep-link that searches the Bristol Tang Soo Do Academy channel
-     * for [videoTitle], landing the user on the correct demonstration video.
+     * The search query used to locate this technique's demonstration video:
+     * the academy name plus the exact block title, so the correct BTSDA upload
+     * is the top result.
+     */
+    val videoQuery: String get() = "Bristol Tang Soo Do Academy $videoTitle"
+
+    /** True when we have the exact BTSDA video and can open it directly. */
+    val hasDirectVideo: Boolean get() = VideoLinks.ids.containsKey(videoTitle)
+
+    /**
+     * A YouTube deep-link for this technique's demonstration video.
+     *
+     * When the exact BTSDA video id is known ([VideoLinks]) it links straight
+     * to that video. Otherwise it falls back to the canonical
+     * `results?search_query=` endpoint, which the YouTube app and browsers open
+     * directly to the results list (the correct BTSDA upload is the top hit).
      */
     val videoUrl: String
         get() {
-            val encoded = URLEncoder.encode(videoTitle, "UTF-8")
-            return "https://www.youtube.com/@bristoltangsoodoacademy/search?query=$encoded"
+            VideoLinks.ids[videoTitle]?.let { videoId ->
+                return VideoLinks.watchUrl(videoId, VideoLinks.startSeconds[id])
+            }
+            val encoded = URLEncoder.encode(videoQuery, "UTF-8")
+            return "https://www.youtube.com/results?search_query=$encoded"
         }
+}
+
+/**
+ * Known BTSDA demonstration videos, keyed by their exact block title
+ * ([Technique.videoTitle]). Techniques whose block appears here open the
+ * video directly; the rest fall back to a channel search. Add entries as the
+ * remaining videos are confirmed.
+ */
+object VideoLinks {
+    val ids: Map<String, String> = mapOf(
+        // Bo staff series.
+        "Bo Staff 1 Steps 1-5" to "nZnX0kgs_Sw",
+        "Bo Staff 1 Steps 6-10" to "qRzaGcJJ2E0",
+        "Bo Staff 1 Steps 11-15" to "gjniNGbuPh4",
+        "Bo Staff 1 Steps 16-20" to "-hYMwVNhH8o",
+        "Bo Staff 1 Steps 21-25" to "dom7Iq__hqE",
+        "Bo Staff 1 Steps 26-30" to "JLr2zCxpXME",
+        // Empty-hand series (hands, feet, self defense share these videos).
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 1-5" to "I4dj-SSDh3Q",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 6-10" to "oB6q-AxH0cs",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 11-15" to "flCo2tl5_3Y",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 16-20" to "wotAiTXp9KU",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 21-25" to "O_qJ9UYpzKU",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 26-30" to "dcsgmRmmAss",
+    )
+
+    /**
+     * Optional start time (in whole seconds) within a block video for an
+     * individual technique, keyed by [Technique.id] (e.g. "BO_STAFF_17").
+     * Since one video covers five techniques, a timestamp jumps straight to
+     * the relevant technique. Add entries over time; anything not listed just
+     * opens the video at the start.
+     *
+     * Example: technique starting at 1:23 -> "BO_STAFF_17" to 83.
+     */
+    val startSeconds: Map<String, Int> = mapOf(
+        // "BO_STAFF_16" to 5,
+        // "BO_STAFF_17" to 41,
+    )
+
+    /** Builds a watch URL, adding a start time (&t=NNs) when one is provided. */
+    fun watchUrl(videoId: String, startSeconds: Int? = null): String =
+        "https://www.youtube.com/watch?v=$videoId" + (startSeconds?.let { "&t=${it}s" } ?: "")
 }
 
 /** Optional descriptive subtitle for a (category, belt) section header. */

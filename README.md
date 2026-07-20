@@ -30,10 +30,10 @@ BTSDA publishes its one-steps in **blocks of five** (1‑5, 6‑10, 11‑15, …
   Sparring) *X‑Y*"** series.
 - Bo Staff has its own **"Bo Staff 1 Steps *X‑Y*"** series.
 
-Each *Watch video* button opens an in-channel YouTube search on
-[@bristoltangsoodoacademy](https://youtube.com/@bristoltangsoodoacademy) for the
-exact block title, so it lands on the right demonstration video and keeps
-working even as the channel adds or re-uploads videos.
+Each *Watch video* button links straight to the exact BTSDA demonstration
+video for that block (see `VideoLinks` in `data/Models.kt`). If a block's video
+id is ever missing, it falls back to a YouTube search for the block title on
+[@bristoltangsoodoacademy](https://youtube.com/@bristoltangsoodoacademy).
 
 ## Download / install
 
