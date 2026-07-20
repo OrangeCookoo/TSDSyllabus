@@ -138,12 +138,21 @@ class SyllabusDataTest {
     }
 
     @Test
-    fun timestampsForTheSixteenToTwentyBlock() {
+    fun timestampsForTheElevenToFifteenBlock() {
         fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
-        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU", tech(Category.HANDS, 16).videoUrl)
-        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=32s", tech(Category.HANDS, 20).videoUrl)
-        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=41s", tech(Category.FEET, 16).videoUrl)
-        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=107s", tech(Category.SELF_DEFENSE, 20).videoUrl)
+        // Hands #11 starts the 11-15 clip; #12 onward carry offsets.
+        assertEquals("https://www.youtube.com/watch?v=flCo2tl5_3Y", tech(Category.HANDS, 11).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=flCo2tl5_3Y&t=11s", tech(Category.HANDS, 12).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=flCo2tl5_3Y&t=41s", tech(Category.FEET, 11).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=flCo2tl5_3Y&t=107s", tech(Category.SELF_DEFENSE, 15).videoUrl)
+    }
+
+    @Test
+    fun sixteenToTwentyBlockHasNoTimestampsYet() {
+        fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
+        // 16-20 not supplied yet: opens at the start of its video.
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU", tech(Category.FEET, 18).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU", tech(Category.SELF_DEFENSE, 20).videoUrl)
     }
 
     @Test
