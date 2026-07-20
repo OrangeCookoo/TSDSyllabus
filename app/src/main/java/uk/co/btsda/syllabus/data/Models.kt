@@ -77,8 +77,8 @@ data class Technique(
      */
     val videoUrl: String
         get() {
-            VideoLinks.ids[videoTitle]?.let { id ->
-                return "https://www.youtube.com/watch?v=$id"
+            VideoLinks.ids[videoTitle]?.let { videoId ->
+                return VideoLinks.watchUrl(videoId, VideoLinks.startSeconds[id])
             }
             val encoded = URLEncoder.encode(videoQuery, "UTF-8")
             return "https://www.youtube.com/results?search_query=$encoded"
@@ -108,6 +108,24 @@ object VideoLinks {
         "Il Soo Sik Dae Ryun (1 Step Sparring) 21-25" to "O_qJ9UYpzKU",
         "Il Soo Sik Dae Ryun (1 Step Sparring) 26-30" to "dcsgmRmmAss",
     )
+
+    /**
+     * Optional start time (in whole seconds) within a block video for an
+     * individual technique, keyed by [Technique.id] (e.g. "BO_STAFF_17").
+     * Since one video covers five techniques, a timestamp jumps straight to
+     * the relevant technique. Add entries over time; anything not listed just
+     * opens the video at the start.
+     *
+     * Example: technique starting at 1:23 -> "BO_STAFF_17" to 83.
+     */
+    val startSeconds: Map<String, Int> = mapOf(
+        // "BO_STAFF_16" to 5,
+        // "BO_STAFF_17" to 41,
+    )
+
+    /** Builds a watch URL, adding a start time (&t=NNs) when one is provided. */
+    fun watchUrl(videoId: String, startSeconds: Int? = null): String =
+        "https://www.youtube.com/watch?v=$videoId" + (startSeconds?.let { "&t=${it}s" } ?: "")
 }
 
 /** Optional descriptive subtitle for a (category, belt) section header. */

@@ -7,6 +7,7 @@ import org.junit.Test
 import uk.co.btsda.syllabus.data.Belt
 import uk.co.btsda.syllabus.data.Category
 import uk.co.btsda.syllabus.data.SyllabusData
+import uk.co.btsda.syllabus.data.VideoLinks
 
 class SyllabusDataTest {
 
@@ -81,6 +82,12 @@ class SyllabusDataTest {
         assertTrue(SyllabusData.techniques.all {
             it.videoUrl.startsWith("https://www.youtube.com/watch?v=")
         })
+    }
+
+    @Test
+    fun watchUrlAppendsTimestampWhenProvided() {
+        assertEquals("https://www.youtube.com/watch?v=abc", VideoLinks.watchUrl("abc", null))
+        assertEquals("https://www.youtube.com/watch?v=abc&t=83s", VideoLinks.watchUrl("abc", 83))
     }
 
     @Test
