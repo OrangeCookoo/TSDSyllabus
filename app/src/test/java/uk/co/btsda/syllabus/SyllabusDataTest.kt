@@ -158,6 +158,15 @@ class SyllabusDataTest {
     }
 
     @Test
+    fun timestampsForTheTwentyOneToTwentyFiveBlock() {
+        fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
+        assertEquals("https://www.youtube.com/watch?v=O_qJ9UYpzKU", tech(Category.HANDS, 21).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=O_qJ9UYpzKU&t=9s", tech(Category.HANDS, 22).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=O_qJ9UYpzKU&t=43s", tech(Category.FEET, 21).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=O_qJ9UYpzKU&t=126s", tech(Category.SELF_DEFENSE, 25).videoUrl)
+    }
+
+    @Test
     fun boStaffUsesRedTagBeltButOtherCategoriesDoNot() {
         assertTrue(SyllabusData.beltsIn(Category.BO_STAFF).contains(Belt.RED_TAG))
         assertFalse(SyllabusData.beltsIn(Category.HANDS).contains(Belt.RED_TAG))
