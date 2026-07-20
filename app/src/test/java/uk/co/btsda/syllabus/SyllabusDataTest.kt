@@ -148,11 +148,13 @@ class SyllabusDataTest {
     }
 
     @Test
-    fun sixteenToTwentyBlockHasNoTimestampsYet() {
+    fun timestampsForTheSixteenToTwentyBlock() {
         fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
-        // 16-20 not supplied yet: opens at the start of its video.
-        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU", tech(Category.FEET, 18).videoUrl)
-        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU", tech(Category.SELF_DEFENSE, 20).videoUrl)
+        // Hands #16 starts the 16-20 clip; #17 onward carry offsets.
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU", tech(Category.HANDS, 16).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=22s", tech(Category.HANDS, 17).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=74s", tech(Category.FEET, 16).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=wotAiTXp9KU&t=154s", tech(Category.SELF_DEFENSE, 20).videoUrl)
     }
 
     @Test
