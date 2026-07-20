@@ -64,17 +64,44 @@ data class Technique(
      */
     val videoQuery: String get() = "Bristol Tang Soo Do Academy $videoTitle"
 
+    /** True when we have the exact BTSDA video and can open it directly. */
+    val hasDirectVideo: Boolean get() = VideoLinks.ids.containsKey(videoTitle)
+
     /**
-     * A YouTube deep-link to the search results for [videoQuery]. This uses the
-     * canonical `results?search_query=` endpoint, which the YouTube app and
-     * browsers both open directly to the results list (unlike the channel
-     * search path, which silently falls back to the channel home page).
+     * A YouTube deep-link for this technique's demonstration video.
+     *
+     * When the exact BTSDA video id is known ([VideoLinks]) it links straight
+     * to that video. Otherwise it falls back to the canonical
+     * `results?search_query=` endpoint, which the YouTube app and browsers open
+     * directly to the results list (the correct BTSDA upload is the top hit).
      */
     val videoUrl: String
         get() {
+            VideoLinks.ids[videoTitle]?.let { id ->
+                return "https://www.youtube.com/watch?v=$id"
+            }
             val encoded = URLEncoder.encode(videoQuery, "UTF-8")
             return "https://www.youtube.com/results?search_query=$encoded"
         }
+}
+
+/**
+ * Known BTSDA demonstration videos, keyed by their exact block title
+ * ([Technique.videoTitle]). Techniques whose block appears here open the
+ * video directly; the rest fall back to a channel search. Add entries as the
+ * remaining videos are confirmed.
+ */
+object VideoLinks {
+    val ids: Map<String, String> = mapOf(
+        // Bo staff series (confirmed).
+        "Bo Staff 1 Steps 1-5" to "dom7Iq__hqE",
+        "Bo Staff 1 Steps 6-10" to "qRzaGcJJ2E0",
+        "Bo Staff 1 Steps 11-15" to "gjniNGbuPh4",
+        "Bo Staff 1 Steps 16-20" to "-hYMwVNhH8o",
+        // "Bo Staff 1 Steps 21-25" pending (supplied link duplicated 1-5).
+        // "Bo Staff 1 Steps 26-30" pending.
+        // "Il Soo Sik Dae Ryun (1 Step Sparring) 1-5" .. "26-30" pending.
+    )
 }
 
 /** Optional descriptive subtitle for a (category, belt) section header. */

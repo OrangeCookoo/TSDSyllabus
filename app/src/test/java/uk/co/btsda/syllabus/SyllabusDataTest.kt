@@ -75,15 +75,30 @@ class SyllabusDataTest {
     }
 
     @Test
-    fun videoUrlIsAYouTubeSearchForTheBtsdaVideo() {
-        val t = SyllabusData.techniques.first()
-        // Canonical results endpoint the YouTube app opens directly.
+    fun emptyHandVideoUrlFallsBackToSearch() {
+        val t = SyllabusData.techniques.first() // Hands #1, no direct id yet
+        assertFalse(t.hasDirectVideo)
         assertTrue(t.videoUrl.startsWith("https://www.youtube.com/results?search_query="))
-        // Query carries the academy name and the exact block title.
         assertTrue(t.videoQuery.startsWith("Bristol Tang Soo Do Academy "))
         assertTrue(t.videoQuery.contains("Il Soo Sik Dae Ryun (1 Step Sparring) 1-5"))
-        // Encoded into the URL (spaces -> +, parentheses -> %28/%29).
         assertTrue(t.videoUrl.contains("Sparring"))
+    }
+
+    @Test
+    fun confirmedBoStaffBlocksLinkDirectlyToTheVideo() {
+        fun bo(n: Int) = SyllabusData.byCategory(Category.BO_STAFF).first { it.number == n }
+        assertEquals("https://www.youtube.com/watch?v=dom7Iq__hqE", bo(3).videoUrl)   // 1-5
+        assertEquals("https://www.youtube.com/watch?v=qRzaGcJJ2E0", bo(8).videoUrl)   // 6-10
+        assertEquals("https://www.youtube.com/watch?v=gjniNGbuPh4", bo(13).videoUrl)  // 11-15
+        assertEquals("https://www.youtube.com/watch?v=-hYMwVNhH8o", bo(18).videoUrl)  // 16-20
+        assertTrue(bo(3).hasDirectVideo)
+    }
+
+    @Test
+    fun unconfirmedBoStaffBlocksStillUseSearch() {
+        val bo23 = SyllabusData.byCategory(Category.BO_STAFF).first { it.number == 23 } // 21-25 pending
+        assertFalse(bo23.hasDirectVideo)
+        assertTrue(bo23.videoUrl.startsWith("https://www.youtube.com/results?search_query="))
     }
 
     @Test
