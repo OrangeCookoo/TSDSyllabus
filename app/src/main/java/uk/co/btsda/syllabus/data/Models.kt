@@ -180,6 +180,21 @@ object VideoLinks {
         "SELF_DEFENSE_18" to 136,
         "SELF_DEFENSE_19" to 144,
         "SELF_DEFENSE_20" to 154,
+        // "1 Step Sparring" block 21-25 video (hands #21 at the start).
+        "HANDS_22" to 9,
+        "HANDS_23" to 18,
+        "HANDS_24" to 26,
+        "HANDS_25" to 33,
+        "FEET_21" to 43,
+        "FEET_22" to 50,
+        "FEET_23" to 60,
+        "FEET_24" to 68,
+        "FEET_25" to 76,
+        "SELF_DEFENSE_21" to 84,
+        "SELF_DEFENSE_22" to 97,
+        "SELF_DEFENSE_23" to 107,
+        "SELF_DEFENSE_24" to 116,
+        "SELF_DEFENSE_25" to 126,
     )
 
     /** Builds a watch URL, adding a start time (&t=NNs) when one is provided. */
