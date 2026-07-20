@@ -58,13 +58,22 @@ data class Technique(
         }
 
     /**
-     * A YouTube deep-link that searches the Bristol Tang Soo Do Academy channel
-     * for [videoTitle], landing the user on the correct demonstration video.
+     * The search query used to locate this technique's demonstration video:
+     * the academy name plus the exact block title, so the correct BTSDA upload
+     * is the top result.
+     */
+    val videoQuery: String get() = "Bristol Tang Soo Do Academy $videoTitle"
+
+    /**
+     * A YouTube deep-link to the search results for [videoQuery]. This uses the
+     * canonical `results?search_query=` endpoint, which the YouTube app and
+     * browsers both open directly to the results list (unlike the channel
+     * search path, which silently falls back to the channel home page).
      */
     val videoUrl: String
         get() {
-            val encoded = URLEncoder.encode(videoTitle, "UTF-8")
-            return "https://www.youtube.com/@bristoltangsoodoacademy/search?query=$encoded"
+            val encoded = URLEncoder.encode(videoQuery, "UTF-8")
+            return "https://www.youtube.com/results?search_query=$encoded"
         }
 }
 

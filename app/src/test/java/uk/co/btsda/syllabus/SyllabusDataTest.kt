@@ -75,10 +75,14 @@ class SyllabusDataTest {
     }
 
     @Test
-    fun videoUrlPointsAtBtsdaChannelSearch() {
+    fun videoUrlIsAYouTubeSearchForTheBtsdaVideo() {
         val t = SyllabusData.techniques.first()
-        assertTrue(t.videoUrl.startsWith("https://www.youtube.com/@bristoltangsoodoacademy/search?query="))
-        // "1 Step Sparring" -> the space becomes + and parentheses are encoded
+        // Canonical results endpoint the YouTube app opens directly.
+        assertTrue(t.videoUrl.startsWith("https://www.youtube.com/results?search_query="))
+        // Query carries the academy name and the exact block title.
+        assertTrue(t.videoQuery.startsWith("Bristol Tang Soo Do Academy "))
+        assertTrue(t.videoQuery.contains("Il Soo Sik Dae Ryun (1 Step Sparring) 1-5"))
+        // Encoded into the URL (spaces -> +, parentheses -> %28/%29).
         assertTrue(t.videoUrl.contains("Sparring"))
     }
 
