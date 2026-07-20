@@ -93,14 +93,20 @@ data class Technique(
  */
 object VideoLinks {
     val ids: Map<String, String> = mapOf(
-        // Bo staff series (confirmed).
-        "Bo Staff 1 Steps 1-5" to "dom7Iq__hqE",
+        // Bo staff series.
+        "Bo Staff 1 Steps 1-5" to "nZnX0kgs_Sw",
         "Bo Staff 1 Steps 6-10" to "qRzaGcJJ2E0",
         "Bo Staff 1 Steps 11-15" to "gjniNGbuPh4",
         "Bo Staff 1 Steps 16-20" to "-hYMwVNhH8o",
-        // "Bo Staff 1 Steps 21-25" pending (supplied link duplicated 1-5).
-        // "Bo Staff 1 Steps 26-30" pending.
-        // "Il Soo Sik Dae Ryun (1 Step Sparring) 1-5" .. "26-30" pending.
+        "Bo Staff 1 Steps 21-25" to "dom7Iq__hqE",
+        "Bo Staff 1 Steps 26-30" to "JLr2zCxpXME",
+        // Empty-hand series (hands, feet, self defense share these videos).
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 1-5" to "I4dj-SSDh3Q",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 6-10" to "oB6q-AxH0cs",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 11-15" to "flCo2tl5_3Y",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 16-20" to "wotAiTXp9KU",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 21-25" to "O_qJ9UYpzKU",
+        "Il Soo Sik Dae Ryun (1 Step Sparring) 26-30" to "dcsgmRmmAss",
     )
 }
 
