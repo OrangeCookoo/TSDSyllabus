@@ -128,6 +128,16 @@ class SyllabusDataTest {
     }
 
     @Test
+    fun timestampsForTheSixToTenBlock() {
+        fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
+        // Hands #6 starts the 6-10 clip.
+        assertEquals("https://www.youtube.com/watch?v=oB6q-AxH0cs", tech(Category.HANDS, 6).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=oB6q-AxH0cs&t=10s", tech(Category.HANDS, 7).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=oB6q-AxH0cs&t=60s", tech(Category.FEET, 9).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=oB6q-AxH0cs&t=107s", tech(Category.SELF_DEFENSE, 10).videoUrl)
+    }
+
+    @Test
     fun boStaffUsesRedTagBeltButOtherCategoriesDoNot() {
         assertTrue(SyllabusData.beltsIn(Category.BO_STAFF).contains(Belt.RED_TAG))
         assertFalse(SyllabusData.beltsIn(Category.HANDS).contains(Belt.RED_TAG))
