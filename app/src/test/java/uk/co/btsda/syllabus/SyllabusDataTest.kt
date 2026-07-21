@@ -167,6 +167,30 @@ class SyllabusDataTest {
     }
 
     @Test
+    fun timestampsForTheTwentySixToThirtyBlock() {
+        fun tech(c: Category, n: Int) = SyllabusData.byCategory(c).first { it.number == n }
+        assertEquals("https://www.youtube.com/watch?v=dcsgmRmmAss", tech(Category.HANDS, 26).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=dcsgmRmmAss&t=8s", tech(Category.HANDS, 27).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=dcsgmRmmAss&t=40s", tech(Category.FEET, 26).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=dcsgmRmmAss&t=104s", tech(Category.SELF_DEFENSE, 30).videoUrl)
+    }
+
+    @Test
+    fun everyEmptyHandTechniqueHasATimestampExceptBlockStarts() {
+        // Blocks start at 1,6,11,16,21,26 -> those open at 0 (no offset); the
+        // rest of the empty-hand syllabus should carry a timestamp.
+        val blockStarts = setOf(1, 6, 11, 16, 21, 26)
+        for (c in listOf(Category.HANDS, Category.FEET, Category.SELF_DEFENSE)) {
+            for (t in SyllabusData.byCategory(c)) {
+                val hasTs = t.videoUrl.contains("&t=")
+                // Hands block-starts open at 0; feet/self-defense always mid-clip.
+                val expectTs = !(c == Category.HANDS && t.number in blockStarts)
+                assertEquals("${c}#${t.number} timestamp presence", expectTs, hasTs)
+            }
+        }
+    }
+
+    @Test
     fun boStaffUsesRedTagBeltButOtherCategoriesDoNot() {
         assertTrue(SyllabusData.beltsIn(Category.BO_STAFF).contains(Belt.RED_TAG))
         assertFalse(SyllabusData.beltsIn(Category.HANDS).contains(Belt.RED_TAG))
