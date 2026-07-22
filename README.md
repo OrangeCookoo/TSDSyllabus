@@ -8,6 +8,10 @@ video on YouTube.
 
 ## Features
 
+- **Three views** via the bottom navigation bar, over the same data:
+  - **Syllabus** — browse by category (below).
+  - **By Belt** — pick a belt and see everything for it across all categories.
+  - **Quiz** — revision mode: pick a belt and scope (that belt, or that belt & below) and get flashcard questions ("Hands #5 — what is it?") with reveal and a running score.
 - **4 categories** — Hands, Feet, Self Defense, Bo Staff — as swipeable tabs.
 - **Belt sections** with rank colours (White → Orange → Green → Brown → Red →
   Red Tag → Blue) and the syllabus sub-notes (e.g. *"Opposite stance – front

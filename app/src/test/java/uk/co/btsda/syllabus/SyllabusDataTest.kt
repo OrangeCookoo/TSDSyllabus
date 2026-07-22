@@ -191,6 +191,29 @@ class SyllabusDataTest {
     }
 
     @Test
+    fun beltViewGroupsAllCategoriesForABelt() {
+        assertEquals(
+            listOf(Belt.WHITE, Belt.ORANGE, Belt.GREEN, Belt.BROWN, Belt.RED, Belt.RED_TAG, Belt.BLUE),
+            SyllabusData.beltsRanked
+        )
+        // Red belt: hands 21-25, feet 21-25, self defense 21-25, bo staff 6-10.
+        val red = SyllabusData.byBelt(Belt.RED)
+        assertEquals(20, red.size)
+        assertTrue(red.map { it.category }.toSet().size >= 3)
+    }
+
+    @Test
+    fun quizPoolRespectsBeltAndScope() {
+        assertEquals(listOf(Belt.WHITE, Belt.ORANGE, Belt.GREEN), SyllabusData.beltAndBelow(Belt.GREEN))
+        // White has no bo staff -> 15 empty-hand techniques; nothing below it.
+        assertEquals(15, SyllabusData.quizPool(Belt.WHITE, includeBelow = false).size)
+        assertEquals(15, SyllabusData.quizPool(Belt.WHITE, includeBelow = true).size)
+        // Red alone = 20; red and below = 15+15+15+20+20 = 85.
+        assertEquals(20, SyllabusData.quizPool(Belt.RED, includeBelow = false).size)
+        assertEquals(85, SyllabusData.quizPool(Belt.RED, includeBelow = true).size)
+    }
+
+    @Test
     fun boStaffUsesRedTagBeltButOtherCategoriesDoNot() {
         assertTrue(SyllabusData.beltsIn(Category.BO_STAFF).contains(Belt.RED_TAG))
         assertFalse(SyllabusData.beltsIn(Category.HANDS).contains(Belt.RED_TAG))

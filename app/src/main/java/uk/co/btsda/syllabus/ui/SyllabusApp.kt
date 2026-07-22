@@ -6,6 +6,9 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,18 +30,27 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
@@ -74,58 +87,92 @@ import uk.co.btsda.syllabus.data.SyllabusData
 import uk.co.btsda.syllabus.data.Technique
 import uk.co.btsda.syllabus.data.beltSubtitle
 
+private enum class AppView(val label: String) {
+    SYLLABUS("Syllabus"), BELT("By Belt"), QUIZ("Quiz")
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SyllabusApp(vm: SyllabusViewModel = viewModel()) {
     val notes by vm.notes.collectAsState()
     val customized by vm.customized.collectAsState()
+    var view by rememberSaveable { mutableStateOf(AppView.SYLLABUS) }
 
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { AppHeader() },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = view == AppView.SYLLABUS,
+                    onClick = { view = AppView.SYLLABUS },
+                    icon = { Icon(Icons.Filled.Category, contentDescription = null) },
+                    label = { Text(AppView.SYLLABUS.label) },
+                )
+                NavigationBarItem(
+                    selected = view == AppView.BELT,
+                    onClick = { view = AppView.BELT },
+                    icon = { Icon(Icons.Filled.MilitaryTech, contentDescription = null) },
+                    label = { Text(AppView.BELT.label) },
+                )
+                NavigationBarItem(
+                    selected = view == AppView.QUIZ,
+                    onClick = { view = AppView.QUIZ },
+                    icon = { Icon(Icons.Filled.Quiz, contentDescription = null) },
+                    label = { Text(AppView.QUIZ.label) },
+                )
+            }
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    ) { padding ->
+        Box(Modifier.padding(padding).fillMaxSize()) {
+            when (view) {
+                AppView.SYLLABUS -> SyllabusByCategoryScreen(notes, customized, vm)
+                AppView.BELT -> ByBeltScreen(notes, customized, vm)
+                AppView.QUIZ -> QuizScreen(notes)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SyllabusByCategoryScreen(
+    notes: Map<String, String>,
+    customized: Set<String>,
+    vm: SyllabusViewModel,
+) {
     val categories = Category.entries
     val pagerState = rememberPagerState(pageCount = { categories.size })
     val scope = rememberCoroutineScope()
     var query by rememberSaveable { mutableStateOf("") }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = { AppHeader() },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-    ) { padding ->
-        Column(Modifier.padding(padding).fillMaxSize()) {
-
-            SearchField(query = query, onQueryChange = { query = it })
-
-            ScrollableTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                edgePadding = 12.dp,
-                containerColor = MaterialTheme.colorScheme.background,
-            ) {
-                categories.forEachIndexed { index, category ->
-                    Tab(
-                        selected = pagerState.currentPage == index,
-                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                        text = {
-                            Text(
-                                "${category.emoji}  ${category.display}",
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    )
-                }
-            }
-
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize(),
-            ) { page ->
-                CategoryScreen(
-                    category = categories[page],
-                    notes = notes,
-                    customized = customized,
-                    query = query.trim(),
-                    onSave = vm::saveNote,
-                    onReset = vm::resetNote,
+    Column(Modifier.fillMaxSize()) {
+        SearchField(query = query, onQueryChange = { query = it })
+        ScrollableTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            edgePadding = 12.dp,
+            containerColor = MaterialTheme.colorScheme.background,
+        ) {
+            categories.forEachIndexed { index, category ->
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                    text = {
+                        Text("${category.emoji}  ${category.display}", fontWeight = FontWeight.Bold)
+                    },
                 )
             }
+        }
+        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+            CategoryScreen(
+                category = categories[page],
+                notes = notes,
+                customized = customized,
+                query = query.trim(),
+                onSave = vm::saveNote,
+                onReset = vm::resetNote,
+            )
         }
     }
 }
@@ -463,5 +510,277 @@ private fun PillButton(
         Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text(text, color = content, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    }
+}
+
+// ------------------------------------------------------------------ By Belt
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ByBeltScreen(
+    notes: Map<String, String>,
+    customized: Set<String>,
+    vm: SyllabusViewModel,
+) {
+    var beltOrdinal by rememberSaveable { mutableStateOf(Belt.WHITE.ordinal) }
+    val belt = Belt.entries[beltOrdinal]
+    val forBelt = remember(belt) { SyllabusData.byBelt(belt) }
+    val cats = remember(belt) { Category.entries.filter { c -> forBelt.any { it.category == c } } }
+
+    Column(Modifier.fillMaxSize()) {
+        BeltSelector(
+            belts = SyllabusData.beltsRanked,
+            selected = belt,
+            onSelect = { beltOrdinal = it.ordinal },
+        )
+        Text(
+            "${belt.display} belt · ${forBelt.size} techniques",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            cats.forEach { cat ->
+                val items = forBelt.filter { it.category == cat }
+                item(key = "belt_${belt.name}_${cat.name}") { CategoryHeader(cat, items.size) }
+                items(items, key = { it.id }) { t ->
+                    TechniqueCard(
+                        technique = t,
+                        note = notes[t.id] ?: t.defaultNote,
+                        isCustom = t.id in customized,
+                        onSave = vm::saveNote,
+                        onReset = vm::resetNote,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BeltSelector(belts: List<Belt>, selected: Belt, onSelect: (Belt) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        belts.forEach { belt ->
+            FilterChip(
+                selected = belt == selected,
+                onClick = { onSelect(belt) },
+                label = { Text(belt.display, fontWeight = FontWeight.Bold) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = belt.primary,
+                    selectedLabelColor = belt.onPrimary,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryHeader(category: Category, count: Int) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp, bottom = 2.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Brush.horizontalGradient(
+                    listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
+                )
+            )
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "${category.emoji}  ${category.display}",
+            color = Color.White,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 18.sp,
+            modifier = Modifier.weight(1f),
+        )
+        Box(
+            Modifier
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.22f))
+                .padding(horizontal = 10.dp, vertical = 4.dp)
+        ) {
+            Text("$count", color = Color.White, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+// -------------------------------------------------------------------- Quiz
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun QuizScreen(notes: Map<String, String>) {
+    var beltOrdinal by rememberSaveable { mutableStateOf(Belt.RED.ordinal) }
+    val belt = Belt.entries[beltOrdinal]
+    var includeBelow by rememberSaveable { mutableStateOf(false) }
+
+    var deck by remember { mutableStateOf<List<Technique>>(emptyList()) }
+    var index by remember { mutableStateOf(0) }
+    var revealed by remember { mutableStateOf(false) }
+    var correct by remember { mutableStateOf(0) }
+    var answered by remember { mutableStateOf(0) }
+
+    fun start() {
+        deck = SyllabusData.quizPool(belt, includeBelow).shuffled()
+        index = 0
+        revealed = false
+        correct = 0
+        answered = 0
+    }
+
+    fun advance() {
+        index += 1
+        revealed = false
+    }
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 24.dp),
+    ) {
+        Text(
+            "Revision quiz",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(start = 16.dp, top = 12.dp),
+        )
+        Text(
+            "Pick a belt and how much to revise, then start.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 13.sp,
+            modifier = Modifier.padding(start = 16.dp, top = 2.dp, bottom = 4.dp),
+        )
+
+        BeltSelector(
+            belts = SyllabusData.beltsRanked,
+            selected = belt,
+            onSelect = { beltOrdinal = it.ordinal; deck = emptyList() },
+        )
+
+        Row(
+            Modifier.padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            FilterChip(
+                selected = !includeBelow,
+                onClick = { includeBelow = false; deck = emptyList() },
+                label = { Text("This belt") },
+            )
+            FilterChip(
+                selected = includeBelow,
+                onClick = { includeBelow = true; deck = emptyList() },
+                label = { Text("This belt & below") },
+            )
+        }
+
+        Button(
+            onClick = { start() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+        ) {
+            Text(if (deck.isEmpty()) "Start quiz" else "Restart")
+        }
+
+        if (deck.isNotEmpty()) {
+            if (index < deck.size) {
+                val t = deck[index]
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .animateContentSize(),
+                    shape = RoundedCornerShape(18.dp),
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(
+                            "Question ${index + 1} of ${deck.size}",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "${t.belt.display} belt",
+                            color = t.belt.primary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                        )
+                        Text(
+                            "${t.category.emoji}  ${t.category.display} · #${t.number}",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 24.sp,
+                        )
+                        Spacer(Modifier.height(14.dp))
+                        if (!revealed) {
+                            Button(
+                                onClick = { revealed = true },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) { Text("Show answer") }
+                        } else {
+                            Text(
+                                notes[t.id] ?: t.defaultNote,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                OutlinedButton(
+                                    onClick = { answered += 1; advance() },
+                                    modifier = Modifier.weight(1f),
+                                ) { Text("Missed") }
+                                Button(
+                                    onClick = { correct += 1; answered += 1; advance() },
+                                    modifier = Modifier.weight(1f),
+                                ) { Text("Got it") }
+                            }
+                        }
+                    }
+                }
+                Text(
+                    "Score: $correct / $answered",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(16.dp),
+                )
+            } else {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(18.dp),
+                ) {
+                    Column(
+                        Modifier.fillMaxWidth().padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text("Done! 🎉", style = MaterialTheme.typography.headlineSmall)
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "You got $correct of ${deck.size}.",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Spacer(Modifier.height(14.dp))
+                        Button(onClick = { start() }) { Text("Go again") }
+                    }
+                }
+            }
+        }
     }
 }
