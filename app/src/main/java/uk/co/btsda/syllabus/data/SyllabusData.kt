@@ -174,4 +174,19 @@ object SyllabusData {
         byCategory(category).map { it.belt }.distinct()
 
     fun default(id: String): String? = techniques.firstOrNull { it.id == id }?.defaultNote
+
+    /** All belts that appear in the syllabus, in rank order (White -> Blue). */
+    val beltsRanked: List<Belt> = Belt.entries.filter { b -> techniques.any { it.belt == b } }
+
+    /** All techniques at a belt, across every category (category then number order). */
+    fun byBelt(belt: Belt): List<Technique> = techniques.filter { it.belt == belt }
+
+    /** Belts at or below [belt] in rank order (i.e. lower or equal grade). */
+    fun beltAndBelow(belt: Belt): List<Belt> = beltsRanked.filter { it.ordinal <= belt.ordinal }
+
+    /** Techniques to revise for a belt, optionally including everything below it. */
+    fun quizPool(belt: Belt, includeBelow: Boolean): List<Technique> {
+        val belts = if (includeBelow) beltAndBelow(belt).toSet() else setOf(belt)
+        return techniques.filter { it.belt in belts }
+    }
 }
