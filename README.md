@@ -14,7 +14,8 @@ video on YouTube.
   - **Quiz** — revision mode: pick a belt and scope (that belt, or that belt & below) and get flashcard questions ("Hands #5 — what is it?") with reveal and a running score.
 - **4 categories** — Hands, Feet, Self Defense, Bo Staff — as swipeable tabs.
 - **Belt sections** with rank colours (White → Orange → Green → Brown → Red →
-  Red Tag → Blue) and the syllabus sub-notes (e.g. *"Opposite stance – front
+  Blue for the empty-hand syllabus; the Bo Staff syllabus also uses Brown Tag
+  and Red Tag) and the syllabus sub-notes (e.g. *"Opposite stance – front
   kick attack"*).
 - **Pre-populated notes** for all 120 techniques — the author's own short-hand.
 - **Fully editable** — tap *Edit note* on any technique to overwrite the note.

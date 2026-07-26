@@ -193,10 +193,13 @@ class SyllabusDataTest {
     @Test
     fun beltViewGroupsAllCategoriesForABelt() {
         assertEquals(
-            listOf(Belt.WHITE, Belt.ORANGE, Belt.GREEN, Belt.BROWN, Belt.RED, Belt.RED_TAG, Belt.BLUE),
+            listOf(
+                Belt.WHITE, Belt.ORANGE, Belt.GREEN, Belt.BROWN, Belt.BROWN_TAG,
+                Belt.RED, Belt.RED_TAG, Belt.BLUE
+            ),
             SyllabusData.beltsRanked
         )
-        // Red belt: hands 21-25, feet 21-25, self defense 21-25, bo staff 6-10.
+        // Red belt: hands 21-25, feet 21-25, self defense 21-25, bo staff 11-15.
         val red = SyllabusData.byBelt(Belt.RED)
         assertEquals(20, red.size)
         assertTrue(red.map { it.category }.toSet().size >= 3)
@@ -208,9 +211,21 @@ class SyllabusDataTest {
         // White has no bo staff -> 15 empty-hand techniques; nothing below it.
         assertEquals(15, SyllabusData.quizPool(Belt.WHITE, includeBelow = false).size)
         assertEquals(15, SyllabusData.quizPool(Belt.WHITE, includeBelow = true).size)
-        // Red alone = 20; red and below = 15+15+15+20+20 = 85.
+        // Red alone = 20; red and below = White15 + Orange15 + Green15 +
+        // Brown20 + BrownTag5 + Red20 = 90.
         assertEquals(20, SyllabusData.quizPool(Belt.RED, includeBelow = false).size)
-        assertEquals(85, SyllabusData.quizPool(Belt.RED, includeBelow = true).size)
+        assertEquals(90, SyllabusData.quizPool(Belt.RED, includeBelow = true).size)
+    }
+
+    @Test
+    fun boStaffBeltAssignmentMatchesCorrectedMapping() {
+        fun bo(n: Int) = SyllabusData.byCategory(Category.BO_STAFF).first { it.number == n }
+        assertEquals(Belt.BROWN, bo(3).belt)      // 1-5
+        assertEquals(Belt.BROWN_TAG, bo(8).belt)  // 6-10
+        assertEquals(Belt.RED, bo(13).belt)       // 11-15
+        assertEquals(Belt.RED_TAG, bo(18).belt)   // 16-20
+        assertEquals(Belt.BLUE, bo(21).belt)      // 21-30
+        assertEquals(Belt.BLUE, bo(30).belt)
     }
 
     @Test

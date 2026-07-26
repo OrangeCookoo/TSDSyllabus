@@ -17,6 +17,7 @@ enum class Belt(val display: String, val primary: Color, val onPrimary: Color, v
     ORANGE("Orange", Color(0xFFFB8C00), Color(0xFF3E2000), Color(0xFFFFB74D)),
     GREEN("Green", Color(0xFF2E9E4F), Color(0xFF06210F), Color(0xFF69D98A)),
     BROWN("Brown", Color(0xFF795548), Color(0xFFFFF3E0), Color(0xFFA98274)),
+    BROWN_TAG("Brown Tag", Color(0xFF8D6E63), Color(0xFFFFF3E0), Color(0xFFD7CCC8)),
     RED("Red", Color(0xFFE53935), Color(0xFFFFEBEE), Color(0xFFFF867C)),
     RED_TAG("Red Tag", Color(0xFFC62828), Color(0xFFFFEBEE), Color(0xFFFF5F52)),
     BLUE("Blue", Color(0xFF1E88E5), Color(0xFFE3F2FD), Color(0xFF6AB7FF))
@@ -230,9 +231,10 @@ fun beltSubtitle(category: Category, belt: Belt): String? = when (category) {
     }
     Category.BO_STAFF -> when (belt) {
         Belt.BROWN -> "Overhead block"
-        Belt.RED -> "Bo's crossed, touching at top"
-        Belt.RED_TAG -> "Spear attack · block in back stance"
-        Belt.BLUE -> "Baseball bat · triple strike · crossed-bo disarm"
+        Belt.BROWN_TAG -> "Bo's crossed, touching at top"
+        Belt.RED -> "Spear attack · block in back stance"
+        Belt.RED_TAG -> "Baseball bat"
+        Belt.BLUE -> "Triple strike · crossed-bo disarm"
         else -> null
     }
     else -> null

@@ -2,6 +2,7 @@ package uk.co.btsda.syllabus.data
 
 import uk.co.btsda.syllabus.data.Belt.BLUE
 import uk.co.btsda.syllabus.data.Belt.BROWN
+import uk.co.btsda.syllabus.data.Belt.BROWN_TAG
 import uk.co.btsda.syllabus.data.Belt.GREEN
 import uk.co.btsda.syllabus.data.Belt.ORANGE
 import uk.co.btsda.syllabus.data.Belt.RED
@@ -136,21 +137,21 @@ object SyllabusData {
                 Technique(BO_STAFF, BROWN, 3, "OH round"),
                 Technique(BO_STAFF, BROWN, 4, "OH push + spear"),
                 Technique(BO_STAFF, BROWN, 5, "OH Bo one side then other + side kick"),
-                Technique(BO_STAFF, RED, 6, "Block clear, spear to neck"),
-                Technique(BO_STAFF, RED, 7, "Block clear, single strike to head"),
-                Technique(BO_STAFF, RED, 8, "Block fancy thing to ankle"),
-                Technique(BO_STAFF, RED, 9, "Block clear, spin and spear, horse stance"),
-                Technique(BO_STAFF, RED, 10, "Block clear, double head strike"),
-                Technique(BO_STAFF, RED_TAG, 11, "Block slide, head strike"),
-                Technique(BO_STAFF, RED_TAG, 12, "Block slide, double head strike"),
-                Technique(BO_STAFF, RED_TAG, 13, "Block ball strike, head strike"),
-                Technique(BO_STAFF, RED_TAG, 14, "Double block, spinning hook kick"),
-                Technique(BO_STAFF, RED_TAG, 15, "As 14 + round house"),
-                Technique(BO_STAFF, BLUE, 16, "Low block slide, jump thing, head strike", groupLabel = "Baseball bat"),
-                Technique(BO_STAFF, BLUE, 17, "Low block, let go side strike to head"),
-                Technique(BO_STAFF, BLUE, 18, "Low block, let go overhead strike"),
-                Technique(BO_STAFF, BLUE, 19, "Double block, front round"),
-                Technique(BO_STAFF, BLUE, 20, "Double block, skip side"),
+                Technique(BO_STAFF, BROWN_TAG, 6, "Block clear, spear to neck"),
+                Technique(BO_STAFF, BROWN_TAG, 7, "Block clear, single strike to head"),
+                Technique(BO_STAFF, BROWN_TAG, 8, "Block fancy thing to ankle"),
+                Technique(BO_STAFF, BROWN_TAG, 9, "Block clear, spin and spear, horse stance"),
+                Technique(BO_STAFF, BROWN_TAG, 10, "Block clear, double head strike"),
+                Technique(BO_STAFF, RED, 11, "Block slide, head strike"),
+                Technique(BO_STAFF, RED, 12, "Block slide, double head strike"),
+                Technique(BO_STAFF, RED, 13, "Block ball strike, head strike"),
+                Technique(BO_STAFF, RED, 14, "Double block, spinning hook kick"),
+                Technique(BO_STAFF, RED, 15, "As 14 + round house"),
+                Technique(BO_STAFF, RED_TAG, 16, "Low block slide, jump thing, head strike"),
+                Technique(BO_STAFF, RED_TAG, 17, "Low block, let go side strike to head"),
+                Technique(BO_STAFF, RED_TAG, 18, "Low block, let go overhead strike"),
+                Technique(BO_STAFF, RED_TAG, 19, "Double block, front round"),
+                Technique(BO_STAFF, RED_TAG, 20, "Double block, skip side"),
                 Technique(BO_STAFF, BLUE, 21, "Front kick, head strike", groupLabel = "Triple strike"),
                 Technique(BO_STAFF, BLUE, 22, "Side + spear"),
                 Technique(BO_STAFF, BLUE, 23, "RH + groin"),
