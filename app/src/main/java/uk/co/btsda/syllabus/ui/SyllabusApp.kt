@@ -5,6 +5,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -31,6 +32,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MilitaryTech
@@ -44,7 +46,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -562,7 +563,6 @@ private fun ByBeltScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BeltSelector(belts: List<Belt>, selected: Belt, onSelect: (Belt) -> Unit) {
     Row(
@@ -573,16 +573,38 @@ private fun BeltSelector(belts: List<Belt>, selected: Belt, onSelect: (Belt) -> 
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         belts.forEach { belt ->
-            FilterChip(
-                selected = belt == selected,
-                onClick = { onSelect(belt) },
-                label = { Text(belt.display, fontWeight = FontWeight.Bold) },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = belt.primary,
-                    selectedLabelColor = belt.onPrimary,
-                ),
-            )
+            BeltChip(belt = belt, selected = belt == selected) { onSelect(belt) }
         }
+    }
+}
+
+/** A pill coloured with the belt's own colour; the selected one gets a ring + tick. */
+@Composable
+private fun BeltChip(belt: Belt, selected: Boolean, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(24.dp)
+    Row(
+        Modifier
+            .clip(shape)
+            .background(belt.primary)
+            .border(
+                width = if (selected) 3.dp else 1.dp,
+                color = if (selected) belt.onPrimary else belt.onPrimary.copy(alpha = 0.30f),
+                shape = shape,
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (selected) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                tint = belt.onPrimary,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+        }
+        Text(belt.display, color = belt.onPrimary, fontWeight = FontWeight.Bold)
     }
 }
 
