@@ -8,6 +8,7 @@ import uk.co.btsda.syllabus.data.Belt
 import uk.co.btsda.syllabus.data.Category
 import uk.co.btsda.syllabus.data.SyllabusData
 import uk.co.btsda.syllabus.data.VideoLinks
+import uk.co.btsda.syllabus.data.quizDrawWeight
 
 class SyllabusDataTest {
 
@@ -215,6 +216,14 @@ class SyllabusDataTest {
         // Brown20 + BrownTag5 + Red20 = 90.
         assertEquals(20, SyllabusData.quizPool(Belt.RED, includeBelow = false).size)
         assertEquals(90, SyllabusData.quizPool(Belt.RED, includeBelow = true).size)
+    }
+
+    @Test
+    fun quizDrawWeightRisesWithMissesAndResetsAtZero() {
+        assertEquals(1, quizDrawWeight(0))   // fresh / just got it right
+        assertEquals(4, quizDrawWeight(1))   // missed once -> 4x as likely
+        assertEquals(7, quizDrawWeight(2))   // missed twice
+        assertEquals(1, quizDrawWeight(-3))  // guards against negatives
     }
 
     @Test

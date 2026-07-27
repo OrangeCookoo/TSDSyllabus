@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.co.btsda.syllabus.data.NotesRepository
+import uk.co.btsda.syllabus.data.QuizStatsRepository
 import uk.co.btsda.syllabus.data.SyllabusData
 import uk.co.btsda.syllabus.data.Technique
 
 class SyllabusViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repo = NotesRepository(app)
+    private val quizStats = QuizStatsRepository(app)
 
     /** Current note for each technique id (override if present, else default). */
     val notes: StateFlow<Map<String, String>> =
@@ -45,4 +47,16 @@ class SyllabusViewModel(app: Application) : AndroidViewModel(app) {
     fun resetNote(id: String) = viewModelScope.launch {
         repo.resetNote(id)
     }
+
+    /** Per-technique quiz miss counts (drives how often each is drawn). */
+    val quizMissCounts: StateFlow<Map<String, Int>> =
+        quizStats.missCounts.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyMap()
+        )
+
+    fun quizMissed(id: String) = viewModelScope.launch { quizStats.recordMiss(id) }
+
+    fun quizCorrect(id: String) = viewModelScope.launch { quizStats.recordCorrect(id) }
 }
