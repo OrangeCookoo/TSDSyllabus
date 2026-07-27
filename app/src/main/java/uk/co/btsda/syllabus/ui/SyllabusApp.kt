@@ -88,6 +88,7 @@ import uk.co.btsda.syllabus.data.Category
 import uk.co.btsda.syllabus.data.SyllabusData
 import uk.co.btsda.syllabus.data.Technique
 import uk.co.btsda.syllabus.data.beltSubtitle
+import uk.co.btsda.syllabus.data.quizDrawWeight
 
 private enum class AppView(val label: String) {
     SYLLABUS("Syllabus"), BELT("By Belt"), QUIZ("Quiz")
