@@ -46,16 +46,22 @@ jobs:
 
       - name: Publish APK to Release
         if: github.ref == 'refs/heads/claude/tang-soo-do-app-mukklo'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: app-latest
-          name: TSD Syllabus (latest build)
-          body: |
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTES: |
             Latest debug build of the Tang Soo Do Syllabus Android app.
-            Download **TSD-Syllabus.apk** below and install on your Android device
+            Download TSD-Syllabus.apk below and install on your Android device
             (you may need to allow "install from unknown sources").
-          files: dist/TSD-Syllabus.apk
-          make_latest: true
+        run: |
+          if gh release view app-latest --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload app-latest dist/TSD-Syllabus.apk \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create app-latest dist/TSD-Syllabus.apk \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "TSD Syllabus (latest build)" \
+              --notes "$NOTES"
+          fi
 
   instrumented-test:
     name: Emulator UI test
