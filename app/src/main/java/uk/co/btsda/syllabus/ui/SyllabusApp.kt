@@ -86,6 +86,7 @@ import uk.co.btsda.syllabus.R
 import uk.co.btsda.syllabus.data.Belt
 import uk.co.btsda.syllabus.data.Category
 import uk.co.btsda.syllabus.data.Form
+import uk.co.btsda.syllabus.data.FormType
 import uk.co.btsda.syllabus.data.Forms
 import uk.co.btsda.syllabus.data.SyllabusData
 import uk.co.btsda.syllabus.data.Technique
@@ -553,24 +554,38 @@ private fun ByBeltScreen(
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
         )
-        val forms = Forms.forBelt(belt)
+        val hyungs = Forms.forBelt(belt, FormType.EMPTY_HAND)
+        val boForms = Forms.forBelt(belt, FormType.BO_STAFF)
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (forms.isNotEmpty()) {
+            if (hyungs.isNotEmpty()) {
                 item(key = "forms_${belt.name}") {
                     SectionBanner(
                         title = "📜  Forms (Hyung)",
-                        count = forms.size,
+                        count = hyungs.size,
                         colors = listOf(
                             MaterialTheme.colorScheme.secondary,
                             MaterialTheme.colorScheme.primary,
                         ),
                     )
                 }
-                items(forms, key = { "form_${belt.name}_${it.name}" }) { f -> FormCard(f) }
+                items(hyungs, key = { "form_${belt.name}_${it.name}" }) { f -> FormCard(f) }
+            }
+            if (boForms.isNotEmpty()) {
+                item(key = "boforms_${belt.name}") {
+                    SectionBanner(
+                        title = "🥍  Bo Staff Form",
+                        count = boForms.size,
+                        colors = listOf(
+                            MaterialTheme.colorScheme.tertiary,
+                            MaterialTheme.colorScheme.secondary,
+                        ),
+                    )
+                }
+                items(boForms, key = { "boform_${belt.name}_${it.name}" }) { f -> FormCard(f) }
             }
             cats.forEach { cat ->
                 val items = forBelt.filter { it.category == cat }
@@ -717,8 +732,8 @@ private sealed interface QuizItem {
         override val id: String get() = technique.id
     }
 
-    data class FormsOf(val belt: Belt, val forms: List<Form>) : QuizItem {
-        override val id: String get() = "FORMS_${belt.name}"
+    data class FormsOf(val belt: Belt, val forms: List<Form>, val boStaff: Boolean) : QuizItem {
+        override val id: String get() = (if (boStaff) "BOFORMS_" else "FORMS_") + belt.name
     }
 }
 
@@ -737,8 +752,13 @@ private fun QuizScreen(
     val pool = remember(belt, includeBelow) {
         val belts = if (includeBelow) SyllabusData.beltAndBelow(belt) else listOf(belt)
         val techItems = SyllabusData.quizPool(belt, includeBelow).map { QuizItem.Tech(it) }
-        val formItems = belts.mapNotNull { b ->
-            Forms.forBelt(b).takeIf { it.isNotEmpty() }?.let { QuizItem.FormsOf(b, it) }
+        val formItems = belts.flatMap { b ->
+            listOfNotNull(
+                Forms.forBelt(b, FormType.EMPTY_HAND).takeIf { it.isNotEmpty() }
+                    ?.let { QuizItem.FormsOf(b, it, boStaff = false) },
+                Forms.forBelt(b, FormType.BO_STAFF).takeIf { it.isNotEmpty() }
+                    ?.let { QuizItem.FormsOf(b, it, boStaff = true) },
+            )
         }
         techItems + formItems
     }
@@ -911,7 +931,8 @@ private fun QuizScreen(
                                 fontSize = 13.sp,
                             )
                             Text(
-                                "📜  Name the form(s) for this belt",
+                                if (item.boStaff) "🥍  Name the bo staff form for this belt"
+                                else "📜  Name the form(s) for this belt",
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 22.sp,
                             )

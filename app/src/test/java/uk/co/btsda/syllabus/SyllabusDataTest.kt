@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.co.btsda.syllabus.data.Belt
 import uk.co.btsda.syllabus.data.Category
+import uk.co.btsda.syllabus.data.FormType
 import uk.co.btsda.syllabus.data.Forms
 import uk.co.btsda.syllabus.data.SyllabusData
 import uk.co.btsda.syllabus.data.VideoLinks
@@ -220,36 +221,38 @@ class SyllabusDataTest {
     }
 
     @Test
-    fun formsAreDefinedPerEmptyHandBelt() {
-        assertEquals(11, Forms.all.size)
-        assertEquals(2, Forms.forBelt(Belt.WHITE).size)
-        assertEquals(2, Forms.forBelt(Belt.ORANGE).size)
-        assertEquals(2, Forms.forBelt(Belt.GREEN).size)
-        assertEquals(2, Forms.forBelt(Belt.BROWN).size)
-        assertEquals(2, Forms.forBelt(Belt.RED).size)
-        assertEquals(1, Forms.forBelt(Belt.BLUE).size)
-        // Bo-staff-only belts have no forms.
+    fun formsAreDefinedPerBeltByType() {
+        assertEquals(14, Forms.all.size)
+        // Empty-hand hyung per belt.
+        assertEquals(2, Forms.forBelt(Belt.WHITE, FormType.EMPTY_HAND).size)
+        assertEquals(2, Forms.forBelt(Belt.ORANGE, FormType.EMPTY_HAND).size)
+        assertEquals(2, Forms.forBelt(Belt.GREEN, FormType.EMPTY_HAND).size)
+        assertEquals(2, Forms.forBelt(Belt.BROWN, FormType.EMPTY_HAND).size)
+        assertEquals(2, Forms.forBelt(Belt.RED, FormType.EMPTY_HAND).size)
+        assertEquals("Sipsoo", Forms.forBelt(Belt.BLUE, FormType.EMPTY_HAND).single().name)
+        // Bo staff forms: brown/red/blue only.
+        assertEquals("Bong Hyung Il Bu", Forms.forBelt(Belt.BROWN, FormType.BO_STAFF).single().name)
+        assertEquals("Bong Hyung E Bu", Forms.forBelt(Belt.RED, FormType.BO_STAFF).single().name)
+        assertEquals("Bong Hyung Sam Bu", Forms.forBelt(Belt.BLUE, FormType.BO_STAFF).single().name)
+        assertTrue(Forms.forBelt(Belt.WHITE, FormType.BO_STAFF).isEmpty())
         assertTrue(Forms.forBelt(Belt.BROWN_TAG).isEmpty())
         assertTrue(Forms.forBelt(Belt.RED_TAG).isEmpty())
-        assertEquals(
-            listOf(Belt.WHITE, Belt.ORANGE, Belt.GREEN, Belt.BROWN, Belt.RED, Belt.BLUE),
-            Forms.beltsWithForms
-        )
-        assertEquals("Sipsoo", Forms.forBelt(Belt.BLUE).single().name)
     }
 
     @Test
     fun everyFormLinksDirectlyToItsVideo() {
         assertTrue(Forms.all.all { it.videoUrl.startsWith("https://www.youtube.com/watch?v=") })
-        val bassai = Forms.forBelt(Belt.RED).first { it.name == "Bassai" }
-        assertEquals("https://www.youtube.com/watch?v=KaxkLdtlT6g", bassai.videoUrl)
         assertEquals(
-            "https://www.youtube.com/watch?v=XmgnZGCY3xI",
-            Forms.forBelt(Belt.BLUE).single().videoUrl
+            "https://www.youtube.com/watch?v=KaxkLdtlT6g",
+            Forms.forBelt(Belt.RED, FormType.EMPTY_HAND).first { it.name == "Bassai" }.videoUrl
         )
         assertEquals(
-            "https://www.youtube.com/watch?v=xA7850ho2Ms",
-            Forms.forBelt(Belt.WHITE).first { it.name == "Ki Cho Hyung Il Bu" }.videoUrl
+            "https://www.youtube.com/watch?v=XmgnZGCY3xI",
+            Forms.forBelt(Belt.BLUE, FormType.EMPTY_HAND).single().videoUrl
+        )
+        assertEquals(
+            "https://www.youtube.com/watch?v=QamIx3uVjgU",
+            Forms.forBelt(Belt.BROWN, FormType.BO_STAFF).single().videoUrl
         )
     }
 
