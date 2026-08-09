@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import uk.co.btsda.syllabus.data.Belt
 import uk.co.btsda.syllabus.data.Category
+import uk.co.btsda.syllabus.data.Forms
 import uk.co.btsda.syllabus.data.SyllabusData
 import uk.co.btsda.syllabus.data.VideoLinks
 import uk.co.btsda.syllabus.data.quizDrawWeight
@@ -216,6 +217,32 @@ class SyllabusDataTest {
         // Brown20 + BrownTag5 + Red20 = 90.
         assertEquals(20, SyllabusData.quizPool(Belt.RED, includeBelow = false).size)
         assertEquals(90, SyllabusData.quizPool(Belt.RED, includeBelow = true).size)
+    }
+
+    @Test
+    fun formsAreDefinedPerEmptyHandBelt() {
+        assertEquals(11, Forms.all.size)
+        assertEquals(2, Forms.forBelt(Belt.WHITE).size)
+        assertEquals(2, Forms.forBelt(Belt.ORANGE).size)
+        assertEquals(2, Forms.forBelt(Belt.GREEN).size)
+        assertEquals(2, Forms.forBelt(Belt.BROWN).size)
+        assertEquals(2, Forms.forBelt(Belt.RED).size)
+        assertEquals(1, Forms.forBelt(Belt.BLUE).size)
+        // Bo-staff-only belts have no forms.
+        assertTrue(Forms.forBelt(Belt.BROWN_TAG).isEmpty())
+        assertTrue(Forms.forBelt(Belt.RED_TAG).isEmpty())
+        assertEquals(
+            listOf(Belt.WHITE, Belt.ORANGE, Belt.GREEN, Belt.BROWN, Belt.RED, Belt.BLUE),
+            Forms.beltsWithForms
+        )
+        assertEquals("Sipsoo", Forms.forBelt(Belt.BLUE).single().name)
+    }
+
+    @Test
+    fun formVideoUrlFallsBackToChannelSearch() {
+        val bassai = Forms.forBelt(Belt.RED).first { it.name == "Bassai" }
+        assertTrue(bassai.videoUrl.startsWith("https://www.youtube.com/results?search_query="))
+        assertTrue(bassai.videoQuery.startsWith("Bristol Tang Soo Do Academy Bassai"))
     }
 
     @Test
