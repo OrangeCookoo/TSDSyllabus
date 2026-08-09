@@ -17,6 +17,7 @@ video on YouTube.
   Blue for the empty-hand syllabus; the Bo Staff syllabus also uses Brown Tag
   and Red Tag) and the syllabus sub-notes (e.g. *"Opposite stance – front
   kick attack"*).
+- **Forms (Hyung)** listed per belt in the By Belt view, each linking to its video; the quiz also asks you to name a belt's forms.
 - **Pre-populated notes** for all 120 techniques — the author's own short-hand.
 - **Fully editable** — tap *Edit note* on any technique to overwrite the note.
   Your version is saved on-device and marked *your note*; *Reset* restores the

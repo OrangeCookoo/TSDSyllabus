@@ -85,6 +85,8 @@ import kotlinx.coroutines.launch
 import uk.co.btsda.syllabus.R
 import uk.co.btsda.syllabus.data.Belt
 import uk.co.btsda.syllabus.data.Category
+import uk.co.btsda.syllabus.data.Form
+import uk.co.btsda.syllabus.data.Forms
 import uk.co.btsda.syllabus.data.SyllabusData
 import uk.co.btsda.syllabus.data.Technique
 import uk.co.btsda.syllabus.data.beltSubtitle
@@ -551,11 +553,25 @@ private fun ByBeltScreen(
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
         )
+        val forms = Forms.forBelt(belt)
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (forms.isNotEmpty()) {
+                item(key = "forms_${belt.name}") {
+                    SectionBanner(
+                        title = "📜  Forms (Hyung)",
+                        count = forms.size,
+                        colors = listOf(
+                            MaterialTheme.colorScheme.secondary,
+                            MaterialTheme.colorScheme.primary,
+                        ),
+                    )
+                }
+                items(forms, key = { "form_${belt.name}_${it.name}" }) { f -> FormCard(f) }
+            }
             cats.forEach { cat ->
                 val items = forBelt.filter { it.category == cat }
                 item(key = "belt_${belt.name}_${cat.name}") { CategoryHeader(cat, items.size) }
@@ -620,21 +636,26 @@ private fun BeltChip(belt: Belt, selected: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun CategoryHeader(category: Category, count: Int) {
+    SectionBanner(
+        title = "${category.emoji}  ${category.display}",
+        count = count,
+        colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary),
+    )
+}
+
+@Composable
+private fun SectionBanner(title: String, count: Int, colors: List<Color>) {
     Row(
         Modifier
             .fillMaxWidth()
             .padding(top = 12.dp, bottom = 2.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(
-                Brush.horizontalGradient(
-                    listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
-                )
-            )
+            .background(Brush.horizontalGradient(colors))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            "${category.emoji}  ${category.display}",
+            title,
             color = Color.White,
             fontWeight = FontWeight.ExtraBold,
             fontSize = 18.sp,
@@ -651,7 +672,55 @@ private fun CategoryHeader(category: Category, count: Int) {
     }
 }
 
+@Composable
+private fun FormCard(form: Form) {
+    val uriHandler = LocalUriHandler.current
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Text(
+                form.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (form.description != null) {
+                Text(
+                    form.description,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp,
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            PillButton(
+                text = "Watch video",
+                icon = Icons.Default.PlayArrow,
+                container = MaterialTheme.colorScheme.primary,
+                content = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { uriHandler.openUri(form.videoUrl) },
+            )
+        }
+    }
+}
+
 // -------------------------------------------------------------------- Quiz
+
+/** A single quiz question: either a one-step technique or "name the forms for a belt". */
+private sealed interface QuizItem {
+    val id: String
+
+    data class Tech(val technique: Technique) : QuizItem {
+        override val id: String get() = technique.id
+    }
+
+    data class FormsOf(val belt: Belt, val forms: List<Form>) : QuizItem {
+        override val id: String get() = "FORMS_${belt.name}"
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -665,46 +734,41 @@ private fun QuizScreen(
     var beltOrdinal by rememberSaveable { mutableStateOf(Belt.RED.ordinal) }
     val belt = Belt.entries[beltOrdinal]
     var includeBelow by rememberSaveable { mutableStateOf(false) }
-    val pool = remember(belt, includeBelow) { SyllabusData.quizPool(belt, includeBelow) }
+    val pool = remember(belt, includeBelow) {
+        val belts = if (includeBelow) SyllabusData.beltAndBelow(belt) else listOf(belt)
+        val techItems = SyllabusData.quizPool(belt, includeBelow).map { QuizItem.Tech(it) }
+        val formItems = belts.mapNotNull { b ->
+            Forms.forBelt(b).takeIf { it.isNotEmpty() }?.let { QuizItem.FormsOf(b, it) }
+        }
+        techItems + formItems
+    }
 
     var started by remember { mutableStateOf(false) }
-    var current by remember { mutableStateOf<Technique?>(null) }
+    var current by remember { mutableStateOf<QuizItem?>(null) }
     var revealed by remember { mutableStateOf(false) }
     var missed by remember { mutableStateOf(false) }
     var correct by remember { mutableStateOf(0) }
     var answered by remember { mutableStateOf(0) }
 
-    // Weighted random draw: missed techniques (higher weight) come up more often,
-    // and never repeat the same technique twice in a row when there's a choice.
+    // Weighted random draw: missed items (higher weight) come up more often,
+    // and never repeat the same item twice in a row when there's a choice.
     fun draw() {
         val candidates = pool.filter { it.id != current?.id }.ifEmpty { pool }
         val weighted = candidates.map { it to quizDrawWeight(missCounts[it.id] ?: 0) }
         val total = weighted.sumOf { it.second }.coerceAtLeast(1)
         var r = Random.nextInt(total)
         var pick = candidates.first()
-        for ((t, w) in weighted) {
+        for ((item, w) in weighted) {
             r -= w
-            if (r < 0) { pick = t; break }
+            if (r < 0) { pick = item; break }
         }
         current = pick
         revealed = false
         missed = false
     }
 
-    fun start() {
-        correct = 0
-        answered = 0
-        started = true
-        current = null
-        draw()
-    }
-
-    fun reset() {
-        started = false
-        current = null
-        revealed = false
-        missed = false
-    }
+    fun start() { correct = 0; answered = 0; started = true; current = null; draw() }
+    fun reset() { started = false; current = null; revealed = false; missed = false }
 
     Column(
         Modifier
@@ -718,8 +782,8 @@ private fun QuizScreen(
             modifier = Modifier.padding(start = 16.dp, top = 12.dp),
         )
         Text(
-            "Pick a belt and how much to revise. Techniques you miss come back " +
-                "more often until you get them right.",
+            "Pick a belt and how much to revise. Includes forms; anything you " +
+                "miss comes back more often until you get it right.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 4.dp),
@@ -756,8 +820,8 @@ private fun QuizScreen(
             Text(if (!started) "Start quiz" else "Restart")
         }
 
-        val t = current
-        if (started && t != null) {
+        val item = current
+        if (started && item != null) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -766,71 +830,122 @@ private fun QuizScreen(
                 shape = RoundedCornerShape(18.dp),
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text(
-                        "${t.belt.display} belt",
-                        color = t.belt.primary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                    )
-                    Text(
-                        "${t.category.emoji}  ${t.category.display} · #${t.number}",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 24.sp,
-                    )
-                    Spacer(Modifier.height(14.dp))
-                    if (!revealed) {
-                        Button(
-                            onClick = { revealed = true },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Show answer") }
-                    } else {
-                        Text(
-                            notes[t.id] ?: t.defaultNote,
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        if (!missed) {
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                OutlinedButton(
-                                    onClick = { onMissed(t.id); answered += 1; missed = true },
-                                    modifier = Modifier.weight(1f),
-                                ) { Text("Missed") }
-                                Button(
-                                    onClick = { onCorrect(t.id); correct += 1; answered += 1; draw() },
-                                    modifier = Modifier.weight(1f),
-                                ) { Text("Got it") }
-                            }
-                        } else {
+                    when (item) {
+                        is QuizItem.Tech -> {
+                            val t = item.technique
                             Text(
-                                "No worries — watch it back, then carry on. " +
-                                    "This one will come up again soon.",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                "${t.belt.display} belt",
+                                color = t.belt.primary,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
                             )
-                            Spacer(Modifier.height(10.dp))
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                OutlinedButton(
-                                    onClick = { uriHandler.openUri(t.videoUrl) },
-                                    modifier = Modifier.weight(1f),
-                                ) {
-                                    Icon(
-                                        Icons.Filled.PlayArrow,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp),
-                                    )
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Watch video")
-                                }
+                            Text(
+                                "${t.category.emoji}  ${t.category.display} · #${t.number}",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 24.sp,
+                            )
+                            Spacer(Modifier.height(14.dp))
+                            if (!revealed) {
                                 Button(
-                                    onClick = { draw() },
-                                    modifier = Modifier.weight(1f),
-                                ) { Text("Next question") }
+                                    onClick = { revealed = true },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) { Text("Show answer") }
+                            } else {
+                                Text(
+                                    notes[t.id] ?: t.defaultNote,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                if (!missed) {
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        OutlinedButton(
+                                            onClick = { onMissed(t.id); answered += 1; missed = true },
+                                            modifier = Modifier.weight(1f),
+                                        ) { Text("Missed") }
+                                        Button(
+                                            onClick = { onCorrect(t.id); correct += 1; answered += 1; draw() },
+                                            modifier = Modifier.weight(1f),
+                                        ) { Text("Got it") }
+                                    }
+                                } else {
+                                    Text(
+                                        "No worries — watch it back, then carry on. " +
+                                            "This one will come up again soon.",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 13.sp,
+                                    )
+                                    Spacer(Modifier.height(10.dp))
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        OutlinedButton(
+                                            onClick = { uriHandler.openUri(t.videoUrl) },
+                                            modifier = Modifier.weight(1f),
+                                        ) {
+                                            Icon(
+                                                Icons.Filled.PlayArrow,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp),
+                                            )
+                                            Spacer(Modifier.width(4.dp))
+                                            Text("Watch video")
+                                        }
+                                        Button(
+                                            onClick = { draw() },
+                                            modifier = Modifier.weight(1f),
+                                        ) { Text("Next question") }
+                                    }
+                                }
+                            }
+                        }
+
+                        is QuizItem.FormsOf -> {
+                            Text(
+                                "${item.belt.display} belt",
+                                color = item.belt.primary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                            )
+                            Text(
+                                "📜  Name the form(s) for this belt",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 22.sp,
+                            )
+                            Spacer(Modifier.height(14.dp))
+                            if (!revealed) {
+                                Button(
+                                    onClick = { revealed = true },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) { Text("Show answer") }
+                            } else {
+                                item.forms.forEach { f ->
+                                    Text("• ${f.name}", style = MaterialTheme.typography.bodyLarge)
+                                    if (f.description != null) {
+                                        Text(
+                                            "    ${f.description}",
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontSize = 12.sp,
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.height(12.dp))
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    OutlinedButton(
+                                        onClick = { onMissed(item.id); answered += 1; draw() },
+                                        modifier = Modifier.weight(1f),
+                                    ) { Text("Missed") }
+                                    Button(
+                                        onClick = { onCorrect(item.id); correct += 1; answered += 1; draw() },
+                                        modifier = Modifier.weight(1f),
+                                    ) { Text("Got it") }
+                                }
                             }
                         }
                     }
