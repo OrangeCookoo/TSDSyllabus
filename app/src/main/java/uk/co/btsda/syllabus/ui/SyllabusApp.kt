@@ -272,11 +272,11 @@ private fun AppHeader() {
             )
         }
         Spacer(Modifier.width(14.dp))
-        Column {
+        Column(Modifier.weight(1f)) {
             Text(
                 "Tang Soo Do",
                 color = Color.White,
-                fontSize = 26.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
             )
             Text(
@@ -286,6 +286,39 @@ private fun AppHeader() {
                 fontWeight = FontWeight.Medium,
             )
         }
+        Spacer(Modifier.width(8.dp))
+        FuryonBadge()
+    }
+}
+
+private const val FURYON_URL = "https://furyon.co.uk/discount/MARKHILLIER?ref=MARKHILLIER"
+
+/** Clickable Furyon badge in the header; opens the affiliate discount page. */
+@Composable
+private fun FuryonBadge() {
+    val uriHandler = LocalUriHandler.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.White)
+            .clickable { uriHandler.openUri(FURYON_URL) }
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+    ) {
+        Text(
+            "FURYON",
+            color = Color(0xFF12103A),
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 14.sp,
+            letterSpacing = 1.sp,
+        )
+        Text(
+            "shop · MARKHILLIER",
+            color = Color(0xFF12103A).copy(alpha = 0.7f),
+            fontSize = 8.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 0.5.sp,
+        )
     }
 }
 
