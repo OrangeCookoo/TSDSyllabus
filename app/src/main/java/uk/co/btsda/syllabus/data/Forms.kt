@@ -21,10 +21,20 @@ data class Form(val belt: Belt, val name: String, val description: String? = nul
         }
 }
 
-/** Known BTSDA form video ids, keyed by [Form.name]. Add entries as confirmed. */
+/** Known BTSDA form video ids, keyed by [Form.name]. */
 object FormVideoLinks {
     val ids: Map<String, String> = mapOf(
-        // "Pyung Ahn O Dan" to "...",
+        "Ki Cho Hyung Il Bu" to "xA7850ho2Ms",
+        "Ki Cho Hyung E Bu" to "eRU1XWLhWw8",
+        "Ki Cho Hyung Sam Bu" to "fGZHaDNMa2Y",
+        "Pyung Ahn Cho Dan" to "g7jCHOS8Mik",
+        "Pyung Ahn E Dan" to "Dp2DotewXDM",
+        "Pyung Ahn Sam Dan" to "-R8qsIB85Hk",
+        "Pyung Ahn Sah Dan" to "s8Aql1HXlBQ",
+        "Pyung Ahn O Dan" to "eUSetwIN_1Q",
+        "Bassai" to "KaxkLdtlT6g",
+        "Naihanchi Cho Dan" to "ibhvaw9nttM",
+        "Sipsoo" to "XmgnZGCY3xI",
     )
 }
 
