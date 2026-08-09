@@ -157,7 +157,8 @@ private fun SyllabusByCategoryScreen(
     vm: SyllabusViewModel,
 ) {
     val categories = Category.entries
-    val pagerState = rememberPagerState(pageCount = { categories.size })
+    val formsTab = categories.size // last tab is Forms
+    val pagerState = rememberPagerState(pageCount = { categories.size + 1 })
     val scope = rememberCoroutineScope()
     var query by rememberSaveable { mutableStateOf("") }
 
@@ -177,16 +178,63 @@ private fun SyllabusByCategoryScreen(
                     },
                 )
             }
+            Tab(
+                selected = pagerState.currentPage == formsTab,
+                onClick = { scope.launch { pagerState.animateScrollToPage(formsTab) } },
+                text = { Text("📜  Forms", fontWeight = FontWeight.Bold) },
+            )
         }
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-            CategoryScreen(
-                category = categories[page],
-                notes = notes,
-                customized = customized,
-                query = query.trim(),
-                onSave = vm::saveNote,
-                onReset = vm::resetNote,
+            if (page < categories.size) {
+                CategoryScreen(
+                    category = categories[page],
+                    notes = notes,
+                    customized = customized,
+                    query = query.trim(),
+                    onSave = vm::saveNote,
+                    onReset = vm::resetNote,
+                )
+            } else {
+                FormsCatalogScreen(query = query.trim())
+            }
+        }
+    }
+}
+
+@Composable
+private fun FormsCatalogScreen(query: String) {
+    val sections = remember(query) {
+        Forms.beltsWithForms.map { belt ->
+            belt to Forms.forBelt(belt).filter { f ->
+                query.isBlank() ||
+                    f.name.contains(query, ignoreCase = true) ||
+                    (f.description?.contains(query, ignoreCase = true) == true) ||
+                    belt.display.contains(query, ignoreCase = true)
+            }
+        }.filter { it.second.isNotEmpty() }
+    }
+
+    if (sections.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                "No forms match “$query”.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
+        }
+        return
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        sections.forEach { (belt, forms) ->
+            item(key = "formsbelt_${belt.name}") {
+                BeltHeader(belt = belt, subtitle = null, count = forms.size)
+            }
+            items(forms, key = { "catform_${belt.name}_${it.name}" }) { f -> FormCard(f) }
         }
     }
 }
