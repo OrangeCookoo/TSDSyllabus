@@ -239,10 +239,18 @@ class SyllabusDataTest {
     }
 
     @Test
-    fun formVideoUrlFallsBackToChannelSearch() {
+    fun everyFormLinksDirectlyToItsVideo() {
+        assertTrue(Forms.all.all { it.videoUrl.startsWith("https://www.youtube.com/watch?v=") })
         val bassai = Forms.forBelt(Belt.RED).first { it.name == "Bassai" }
-        assertTrue(bassai.videoUrl.startsWith("https://www.youtube.com/results?search_query="))
-        assertTrue(bassai.videoQuery.startsWith("Bristol Tang Soo Do Academy Bassai"))
+        assertEquals("https://www.youtube.com/watch?v=KaxkLdtlT6g", bassai.videoUrl)
+        assertEquals(
+            "https://www.youtube.com/watch?v=XmgnZGCY3xI",
+            Forms.forBelt(Belt.BLUE).single().videoUrl
+        )
+        assertEquals(
+            "https://www.youtube.com/watch?v=xA7850ho2Ms",
+            Forms.forBelt(Belt.WHITE).first { it.name == "Ki Cho Hyung Il Bu" }.videoUrl
+        )
     }
 
     @Test
