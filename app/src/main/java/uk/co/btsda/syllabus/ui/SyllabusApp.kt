@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -293,33 +294,22 @@ private fun AppHeader() {
 
 private const val FURYON_URL = "https://furyon.co.uk/discount/MARKHILLIER?ref=MARKHILLIER"
 
-/** Clickable Furyon badge in the header; opens the affiliate discount page. */
+/** Clickable Furyon Fightwear logo in the header; opens the affiliate discount page. */
 @Composable
 private fun FuryonBadge() {
     val uriHandler = LocalUriHandler.current
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Image(
+        painter = painterResource(R.drawable.furyon_logo),
+        contentDescription = "Furyon Fightwear – shop with Mark Hillier's discount",
+        contentScale = ContentScale.Fit,
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(10.dp))
             .background(Color.White)
             .clickable { uriHandler.openUri(FURYON_URL) }
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-    ) {
-        Text(
-            "FURYON",
-            color = Color(0xFF12103A),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 14.sp,
-            letterSpacing = 1.sp,
-        )
-        Text(
-            "shop · MARKHILLIER",
-            color = Color(0xFF12103A).copy(alpha = 0.7f),
-            fontSize = 8.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.5.sp,
-        )
-    }
+            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .height(28.dp)
+            .aspectRatio(1.87f),
+    )
 }
 
 @Composable
