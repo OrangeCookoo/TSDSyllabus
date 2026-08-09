@@ -732,8 +732,8 @@ private sealed interface QuizItem {
         override val id: String get() = technique.id
     }
 
-    data class FormsOf(val belt: Belt, val forms: List<Form>, val boStaff: Boolean) : QuizItem {
-        override val id: String get() = (if (boStaff) "BOFORMS_" else "FORMS_") + belt.name
+    data class FormQ(val form: Form) : QuizItem {
+        override val id: String get() = "FORM_${form.name}"
     }
 }
 
@@ -752,14 +752,7 @@ private fun QuizScreen(
     val pool = remember(belt, includeBelow) {
         val belts = if (includeBelow) SyllabusData.beltAndBelow(belt) else listOf(belt)
         val techItems = SyllabusData.quizPool(belt, includeBelow).map { QuizItem.Tech(it) }
-        val formItems = belts.flatMap { b ->
-            listOfNotNull(
-                Forms.forBelt(b, FormType.EMPTY_HAND).takeIf { it.isNotEmpty() }
-                    ?.let { QuizItem.FormsOf(b, it, boStaff = false) },
-                Forms.forBelt(b, FormType.BO_STAFF).takeIf { it.isNotEmpty() }
-                    ?.let { QuizItem.FormsOf(b, it, boStaff = true) },
-            )
-        }
+        val formItems = belts.flatMap { b -> Forms.forBelt(b) }.map { QuizItem.FormQ(it) }
         techItems + formItems
     }
 
@@ -923,50 +916,59 @@ private fun QuizScreen(
                             }
                         }
 
-                        is QuizItem.FormsOf -> {
+                        is QuizItem.FormQ -> {
+                            val f = item.form
+                            val label = if (f.type == FormType.BO_STAFF) "🥍  Bo staff form" else "📜  Form"
                             Text(
-                                "${item.belt.display} belt",
-                                color = item.belt.primary,
+                                "${f.belt.display} belt · $label",
+                                color = f.belt.primary,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 13.sp,
                             )
                             Text(
-                                if (item.boStaff) "🥍  Name the bo staff form for this belt"
-                                else "📜  Name the form(s) for this belt",
+                                f.name,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 22.sp,
+                                fontSize = 24.sp,
                             )
-                            Spacer(Modifier.height(14.dp))
-                            if (!revealed) {
+                            if (f.description != null) {
+                                Text(
+                                    f.description,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 13.sp,
+                                )
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                "🧠  Run through this form in your head, then check yourself.",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 14.sp,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            OutlinedButton(
+                                onClick = { uriHandler.openUri(f.videoUrl) },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Icon(
+                                    Icons.Filled.PlayArrow,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text("Watch video")
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                OutlinedButton(
+                                    onClick = { onMissed(item.id); answered += 1; draw() },
+                                    modifier = Modifier.weight(1f),
+                                ) { Text("Didn't get it") }
                                 Button(
-                                    onClick = { revealed = true },
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) { Text("Show answer") }
-                            } else {
-                                item.forms.forEach { f ->
-                                    Text("• ${f.name}", style = MaterialTheme.typography.bodyLarge)
-                                    if (f.description != null) {
-                                        Text(
-                                            "    ${f.description}",
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 12.sp,
-                                        )
-                                    }
-                                }
-                                Spacer(Modifier.height(12.dp))
-                                Row(
-                                    Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    OutlinedButton(
-                                        onClick = { onMissed(item.id); answered += 1; draw() },
-                                        modifier = Modifier.weight(1f),
-                                    ) { Text("Missed") }
-                                    Button(
-                                        onClick = { onCorrect(item.id); correct += 1; answered += 1; draw() },
-                                        modifier = Modifier.weight(1f),
-                                    ) { Text("Got it") }
-                                }
+                                    onClick = { onCorrect(item.id); correct += 1; answered += 1; draw() },
+                                    modifier = Modifier.weight(1f),
+                                ) { Text("Got it") }
                             }
                         }
                     }
