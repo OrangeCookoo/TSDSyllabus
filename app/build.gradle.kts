@@ -12,8 +12,8 @@ android {
         applicationId = "uk.co.btsda.syllabus"
         minSdk = 24
         targetSdk = 35
-        versionCode = 19
-        versionName = "2.5"
+        versionCode = 20
+        versionName = "2.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
