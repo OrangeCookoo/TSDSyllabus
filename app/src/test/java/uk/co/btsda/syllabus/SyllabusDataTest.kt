@@ -265,6 +265,16 @@ class SyllabusDataTest {
     }
 
     @Test
+    fun boStaffOneStepTimestamps() {
+        fun bo(n: Int) = SyllabusData.byCategory(Category.BO_STAFF).first { it.number == n }
+        // Block start (1-5 video) opens at 0; #2 onward carry offsets.
+        assertEquals("https://www.youtube.com/watch?v=nZnX0kgs_Sw", bo(1).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=nZnX0kgs_Sw&t=10s", bo(2).videoUrl)
+        assertEquals("https://www.youtube.com/watch?v=dom7Iq__hqE&t=45s", bo(25).videoUrl) // 21-25
+        assertEquals("https://www.youtube.com/watch?v=JLr2zCxpXME&t=37s", bo(30).videoUrl) // 26-30
+    }
+
+    @Test
     fun boStaffBeltAssignmentMatchesCorrectedMapping() {
         fun bo(n: Int) = SyllabusData.byCategory(Category.BO_STAFF).first { it.number == n }
         assertEquals(Belt.BROWN, bo(3).belt)      // 1-5
