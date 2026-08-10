@@ -95,13 +95,14 @@ class SyllabusDataTest {
 
     @Test
     fun boStaffBlocksLinkToTheCorrectVideo() {
+        // Block-start techniques (no timestamp) map to their block's video.
         fun bo(n: Int) = SyllabusData.byCategory(Category.BO_STAFF).first { it.number == n }
-        assertEquals("https://www.youtube.com/watch?v=nZnX0kgs_Sw", bo(3).videoUrl)   // 1-5
-        assertEquals("https://www.youtube.com/watch?v=qRzaGcJJ2E0", bo(8).videoUrl)   // 6-10
-        assertEquals("https://www.youtube.com/watch?v=gjniNGbuPh4", bo(13).videoUrl)  // 11-15
-        assertEquals("https://www.youtube.com/watch?v=-hYMwVNhH8o", bo(18).videoUrl)  // 16-20
-        assertEquals("https://www.youtube.com/watch?v=dom7Iq__hqE", bo(23).videoUrl)  // 21-25
-        assertEquals("https://www.youtube.com/watch?v=JLr2zCxpXME", bo(28).videoUrl)  // 26-30
+        assertEquals("https://www.youtube.com/watch?v=nZnX0kgs_Sw", bo(1).videoUrl)   // 1-5
+        assertEquals("https://www.youtube.com/watch?v=qRzaGcJJ2E0", bo(6).videoUrl)   // 6-10
+        assertEquals("https://www.youtube.com/watch?v=gjniNGbuPh4", bo(11).videoUrl)  // 11-15
+        assertEquals("https://www.youtube.com/watch?v=-hYMwVNhH8o", bo(16).videoUrl)  // 16-20
+        assertEquals("https://www.youtube.com/watch?v=dom7Iq__hqE", bo(21).videoUrl)  // 21-25
+        assertEquals("https://www.youtube.com/watch?v=JLr2zCxpXME", bo(26).videoUrl)  // 26-30
     }
 
     @Test
